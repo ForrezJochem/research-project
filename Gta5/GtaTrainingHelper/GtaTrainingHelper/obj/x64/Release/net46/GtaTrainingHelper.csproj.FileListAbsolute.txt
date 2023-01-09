@@ -1,0 +1,12 @@
+D:\SteamLibrary\steamapps\common\Grand Theft Auto V\Plugins\net5.0\net46\GtaTrainingHelper.dll
+D:\SteamLibrary\steamapps\common\Grand Theft Auto V\Plugins\net5.0\net46\GtaTrainingHelper.pdb
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.csproj.AssemblyReference.cache
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.GeneratedMSBuildEditorConfig.editorconfig
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.AssemblyInfoInputs.cache
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.AssemblyInfo.cs
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.csproj.CoreCompileInputs.cache
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.csproj.CopyComplete
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.dll
+D:\Github\research-project\Gta5\GtaTrainingHelper\GtaTrainingHelper\obj\x64\Release\net46\GtaTrainingHelper.pdb
+D:\SteamLibrary\steamapps\common\Grand Theft Auto V\Plugins\net46\GtaTrainingHelper.dll
+D:\SteamLibrary\steamapps\common\Grand Theft Auto V\Plugins\net46\GtaTrainingHelper.pdb

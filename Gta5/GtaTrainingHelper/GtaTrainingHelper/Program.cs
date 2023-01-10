@@ -171,5 +171,17 @@ namespace GtaTrainingHelper
                 blip.IsRouteEnabled = true;
             }
         }
+        // delete vehicle
+        [Rage.Attributes.ConsoleCommand]
+        public static void DeleteVehicle()
+        {
+            Vehicle vehicle = Game.LocalPlayer.Character.CurrentVehicle;
+
+            if (vehicle.Exists())
+            {
+                Game.Console.Print("deleting vehicle");
+                vehicle.Delete();
+            }
+        }
     }
 }

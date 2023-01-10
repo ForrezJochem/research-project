@@ -11,20 +11,20 @@ namespace GtaTrainingHelper
     public class Program
     {
         static List<Location> locations = new List<Location> { };
-        static string locationPath = Path.Combine(Environment.CurrentDirectory, "Plugins/Locations.json");
+        static string locationPath = Path.Combine(Environment.CurrentDirectory, @"./Plugins/Locations.json");
         private static void Main()
         {
             Game.Console.Print("GtaTrainingHelper Starting.");
-            List<Location> locations = GetLocations();
+            locations = GetLocations();
             while (true)
             {
                 GameFiber.Yield();
             }
         }
 
-        // this method is to add location to a json file
+        // add location to a json file
         [Rage.Attributes.ConsoleCommand]
-        public static void AddLocation(string name)
+        public static void GTHAddLocation(string name)
         {
             Game.Console.Print("Adding location: " + name);
             Game.Console.Print(locationPath);
@@ -58,5 +58,34 @@ namespace GtaTrainingHelper
                 File.WriteAllText(locationPath, json);
             }
         }
+
+        // teleport to a random location
+        [Rage.Attributes.ConsoleCommand]
+        public static void GTHTeleportToRandomLocation()
+        {
+            Game.Console.Print("Teleporting to random location.");
+            Game.Console.Print(locations.Count.ToString());
+            Random random = new Random();
+            int index = random.Next(locations.Count);
+            Game.LocalPlayer.Character.Position = locations[index].Position;
+            Game.LocalPlayer.Character.Heading = locations[index].Heading;
+        }
+
+        // teleport to a location
+        [Rage.Attributes.ConsoleCommand]
+        public static void GTHTeleportToLocation(string location)
+        {
+            Game.Console.Print("Teleporting to location: " + location);
+            Game.Console.Print(locations.Count.ToString());
+            foreach (Location loc in locations)
+            {
+                if (loc.LocationName.ToLower() == location.ToLower())
+                {
+                    Game.LocalPlayer.Character.Position = loc.Position;
+                    Game.LocalPlayer.Character.Heading = loc.Heading;
+                }
+            }
+        }
+
     }
 }

@@ -15,6 +15,7 @@ namespace GtaTrainingHelper
         private static void Main()
         {
             Game.Console.Print("GtaTrainingHelper Starting.");
+            Game.MaxWantedLevel = 0;
             locations = GetLocations();
             while (true)
             {
@@ -87,5 +88,22 @@ namespace GtaTrainingHelper
             }
         }
 
+        // main setup for training
+        [Rage.Attributes.ConsoleCommand]
+        public static void GTHSetup()
+        {
+            Vehicle vehicle = Game.LocalPlayer.Character.CurrentVehicle;
+            if (vehicle.Exists())
+                vehicle.Delete();
+            GTHTeleportToRandomLocation();
+            Model carModel = new Model("Buffalo2");
+            vehicle = new Vehicle(carModel, Game.LocalPlayer.Character.Position, Game.LocalPlayer.Character.Heading)
+            {
+                LicensePlate = "AiDriver"
+            };
+            Game.LocalPlayer.Character.WarpIntoVehicle(vehicle, -1);
+            Game.LocalPlayer.Character.CanFlyThroughWindshields = false;
+            Game.LocalPlayer.Character.CanBePulledOutOfVehicles = false;
+        }
     }
 }

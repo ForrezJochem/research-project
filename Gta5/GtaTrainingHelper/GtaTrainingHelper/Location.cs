@@ -7,7 +7,7 @@ using Rage;
 
 namespace Gta5Driver
 {
-    class Location
+    public class Location
     {
         public string LocationName { get; set; }
         public Vector3 Position { get; set; }

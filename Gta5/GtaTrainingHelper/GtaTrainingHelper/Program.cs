@@ -6,6 +6,7 @@ namespace GtaTrainingHelper
     using Rage;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Threading;
 
@@ -16,10 +17,17 @@ namespace GtaTrainingHelper
         static bool isTraining = false;
         static List<Location> locations = new List<Location> { };
         static string locationPath = Path.Combine(Environment.CurrentDirectory, @"./Plugins/Locations.json");
+        static string statsPath = Path.Combine(Environment.CurrentDirectory, @"./Plugins/Stats.json");
+        static int vehicleHealth;
+        static DateTime startTime;
+        static Stats stats;
         private static void Main()
         {
             Game.Console.Print("GtaTrainingHelper Starting.");
+            LoadStats();
             Game.MaxWantedLevel = 0;
+            Game.LocalPlayer.IsInvincible = true;
+            Game.LocalPlayer.IsIgnoredByEveryone = true;
             locations = GetLocations();
             blipFixTimer = new Timer(BlipFix, null, 0, 5000);
             while (true)
@@ -28,13 +36,35 @@ namespace GtaTrainingHelper
                 {
                     if (isTraining)
                     {
+                        int healthDifference = vehicleHealth - Game.LocalPlayer.Character.CurrentVehicle.Health;
+                        if (healthDifference > 0)
+                        {
+                            stats.TotalDamage += healthDifference;
+                            Game.Console.Print($"GtaTrainingHelper: Vehicle has taken damage: {healthDifference}.");
+                        }
+                        vehicleHealth = Game.LocalPlayer.Character.CurrentVehicle.Health;
                         if (Game.LocalPlayer.Character.CurrentVehicle.Health < 500)
                         {
+                            stats.TotalFailedRuns++;
                             Game.Console.Print("Vehicle is damaged, resetting.");
                             isTraining = false;
                             GTHSetup();
                         }
-                        else if ((int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position) < 30)
+                        else if (Game.LocalPlayer.Character.CurrentVehicle.HasBeenDisabledByWater)
+                        {
+                            stats.TotalFailedRuns++;
+                            stats.TotalWaterDamage++;
+                            Game.Console.Print("GtaTrainingHelper: Vehicle has been disabled by water, resetting.");
+                            GTHSetup();
+                        }
+                        else if (Game.LocalPlayer.Character.CurrentVehicle.IsUpsideDown)
+                        {
+                            stats.TotalFailedRuns++;
+                            stats.TotalUpsideDown++;
+                            Game.Console.Print("GtaTrainingHelper: Vehicle is upside down, resetting.");
+                            GTHSetup();
+                        }
+                        else if ((int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position) < 50)
                         {
                             Game.Console.Print("GtaTrainingHelper: Arrived at location.");
                             isTraining = false;
@@ -42,6 +72,7 @@ namespace GtaTrainingHelper
                         }
                     }
                 }
+                GameFiber.Sleep(100);
                 GameFiber.Yield();
             }
         }
@@ -85,14 +116,14 @@ namespace GtaTrainingHelper
 
         // teleport to a random location
         [Rage.Attributes.ConsoleCommand]
-        public static void GTHTeleportToRandomLocation()
+        public static Location GTHTeleportToRandomLocation()
         {
             Game.Console.Print("Teleporting to random location.");
-            Game.Console.Print(locations.Count.ToString());
             Random random = new Random();
             int index = random.Next(locations.Count);
             Game.LocalPlayer.Character.Position = locations[index].Position;
             Game.LocalPlayer.Character.Heading = locations[index].Heading;
+            return locations[index];
         }
 
         // teleport to a location
@@ -115,10 +146,15 @@ namespace GtaTrainingHelper
         [Rage.Attributes.ConsoleCommand]
         public static void GTHSetup()
         {
+            if (startTime.ToString() == "1/1/0001 12:00:00 AM")
+            {
+                startTime = DateTime.UtcNow;
+            }
             Vehicle vehicle = Game.LocalPlayer.Character.CurrentVehicle;
             if (vehicle.Exists())
                 vehicle.Delete();
-            GTHTeleportToRandomLocation();
+            World.CleanWorld(true, true, true, true, true, true);
+            Location location = GTHTeleportToRandomLocation();
             Model carModel = new Model("Buffalo2");
             vehicle = new Vehicle(carModel, Game.LocalPlayer.Character.Position, Game.LocalPlayer.Character.Heading)
             {
@@ -127,7 +163,9 @@ namespace GtaTrainingHelper
             Game.LocalPlayer.Character.WarpIntoVehicle(vehicle, -1);
             Game.LocalPlayer.Character.CanFlyThroughWindshields = false;
             Game.LocalPlayer.Character.CanBePulledOutOfVehicles = false;
+            
             GTHSetupRandomBlip();
+            vehicleHealth = vehicle.Health;
             isTraining = true;
         }
 
@@ -173,7 +211,7 @@ namespace GtaTrainingHelper
         }
         // delete vehicle
         [Rage.Attributes.ConsoleCommand]
-        public static void DeleteVehicle()
+        public static void GTHDeleteVehicle()
         {
             Vehicle vehicle = Game.LocalPlayer.Character.CurrentVehicle;
 
@@ -181,6 +219,56 @@ namespace GtaTrainingHelper
             {
                 Game.Console.Print("deleting vehicle");
                 vehicle.Delete();
+            }
+        }
+
+        [Rage.Attributes.ConsoleCommand]
+        public static void GTHCleanUp()
+        {
+            DateTime endTime = DateTime.UtcNow;
+            TimeSpan ts = endTime - startTime;
+            double timeMinutes = ts.TotalMinutes;
+            stats.TimeRan = timeMinutes + stats.TimeRan;
+            SaveStats();
+            Game.Console.Print(stats.TimeRan.ToString());
+            if (Game.LocalPlayer.Character.CurrentVehicle.Exists())
+                Game.LocalPlayer.Character.CurrentVehicle.Delete();
+            isTraining = false;
+            Blip[] blips = World.GetAllBlips();
+            foreach (Blip blip in blips)
+            {
+                blip.Delete();
+            }
+            World.CleanWorld(true, true, true, true, true, true);
+            Game.UnloadActivePlugin();
+        }
+
+        private static void SaveStats()
+        {
+            var json = JsonConvert.SerializeObject(stats);
+            File.WriteAllText(statsPath, json);
+        }
+        private static void LoadStats()
+        {
+            JsonSerializer serializer = new JsonSerializer();
+            if (!File.Exists(statsPath))
+            {
+                stats = new Stats();
+                stats.TimeRan = 0;
+                stats.TotalSuccessfulRuns = 0;
+                stats.TotalFailedRuns = 0;
+                stats.TotalDamage = 0;
+                stats.TotalWaterDamage = 0;
+                stats.TotalUpsideDown = 0;
+                stats.DistanceTraveled = 0;
+            }
+            else
+            {
+                if (File.Exists(statsPath))
+                {
+                    var json = File.ReadAllText(statsPath);
+                    stats = JsonConvert.DeserializeObject<Stats>(json);
+                }
             }
         }
     }

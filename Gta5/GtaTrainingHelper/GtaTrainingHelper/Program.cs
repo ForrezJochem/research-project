@@ -6,8 +6,11 @@ namespace GtaTrainingHelper
     using Rage;
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Globalization;
     using System.IO;
+    using System.Net;
+    using System.Net.Sockets;
     using System.Threading;
 
     public class Program
@@ -18,7 +21,10 @@ namespace GtaTrainingHelper
         static List<Location> locations = new List<Location> { };
         static string locationPath = Path.Combine(Environment.CurrentDirectory, @"./Plugins/Locations.json");
         static string statsPath = Path.Combine(Environment.CurrentDirectory, @"./Plugins/Stats.json");
+        static PythonData pythonData = new PythonData();
         static int vehicleHealth;
+        static int distance;
+        static IPEndPoint ipEndPoint;
         static DateTime startTime;
         static Stats stats;
         private static void Main()
@@ -30,6 +36,7 @@ namespace GtaTrainingHelper
             Game.LocalPlayer.IsIgnoredByEveryone = true;
             locations = GetLocations();
             blipFixTimer = new Timer(BlipFix, null, 0, 5000);
+            
             while (true)
             {
                 if (Game.LocalPlayer.Character.CurrentVehicle)
@@ -37,17 +44,21 @@ namespace GtaTrainingHelper
                     if (isTraining)
                     {
                         int healthDifference = vehicleHealth - Game.LocalPlayer.Character.CurrentVehicle.Health;
+                        pythonData.Distance += distance - (int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position);
+                        distance = (int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position);
                         if (healthDifference > 0)
                         {
                             stats.TotalDamage += healthDifference;
+                            pythonData.Damage += healthDifference;
                             Game.Console.Print($"GtaTrainingHelper: Vehicle has taken damage: {healthDifference}.");
                         }
                         vehicleHealth = Game.LocalPlayer.Character.CurrentVehicle.Health;
                         if (Game.LocalPlayer.Character.CurrentVehicle.Health < 500)
                         {
                             stats.TotalFailedRuns++;
-                            Game.Console.Print("Vehicle is damaged, resetting.");
+                            Game.Console.Print("GtaTrainingHelper: vehicle has to much damage");
                             isTraining = false;
+                            pythonData.HardReset = true;
                             GTHSetup();
                         }
                         else if (Game.LocalPlayer.Character.CurrentVehicle.HasBeenDisabledByWater)
@@ -55,6 +66,7 @@ namespace GtaTrainingHelper
                             stats.TotalFailedRuns++;
                             stats.TotalWaterDamage++;
                             Game.Console.Print("GtaTrainingHelper: Vehicle has been disabled by water, resetting.");
+                            pythonData.HardReset = true;
                             GTHSetup();
                         }
                         else if (Game.LocalPlayer.Character.CurrentVehicle.IsUpsideDown)
@@ -62,17 +74,19 @@ namespace GtaTrainingHelper
                             stats.TotalFailedRuns++;
                             stats.TotalUpsideDown++;
                             Game.Console.Print("GtaTrainingHelper: Vehicle is upside down, resetting.");
+                            pythonData.HardReset = true;
                             GTHSetup();
                         }
                         else if ((int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position) < 50)
                         {
                             Game.Console.Print("GtaTrainingHelper: Arrived at location.");
                             isTraining = false;
+                            pythonData.HardReset = true;
+                            pythonData.Success = true;
                             GTHSetup();
                         }
                     }
                 }
-                GameFiber.Sleep(100);
                 GameFiber.Yield();
             }
         }
@@ -146,9 +160,14 @@ namespace GtaTrainingHelper
         [Rage.Attributes.ConsoleCommand]
         public static void GTHSetup()
         {
+            pythonData.Success = false;
+            pythonData.Damage = 0;
+            pythonData.HardReset = false;
             if (startTime.ToString() == "1/1/0001 12:00:00 AM")
             {
                 startTime = DateTime.UtcNow;
+                ThreadStart socketThreadStart = new ThreadStart(SocketLoop);
+                GameFiber.StartNew(socketThreadStart);
             }
             Vehicle vehicle = Game.LocalPlayer.Character.CurrentVehicle;
             if (vehicle.Exists())
@@ -166,6 +185,7 @@ namespace GtaTrainingHelper
             
             GTHSetupRandomBlip();
             vehicleHealth = vehicle.Health;
+            distance = (int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position);
             isTraining = true;
         }
 
@@ -184,6 +204,7 @@ namespace GtaTrainingHelper
                 blip = new Blip(locations[random.Next(locations.Count)].Position);
             }
             blip.IsRouteEnabled = true;
+            blip.Color = Color.Red;
         }
 
         // setup blip (waypoint) with name
@@ -214,7 +235,6 @@ namespace GtaTrainingHelper
         public static void GTHDeleteVehicle()
         {
             Vehicle vehicle = Game.LocalPlayer.Character.CurrentVehicle;
-
             if (vehicle.Exists())
             {
                 Game.Console.Print("deleting vehicle");
@@ -248,6 +268,7 @@ namespace GtaTrainingHelper
             var json = JsonConvert.SerializeObject(stats);
             File.WriteAllText(statsPath, json);
         }
+        
         private static void LoadStats()
         {
             JsonSerializer serializer = new JsonSerializer();
@@ -269,6 +290,58 @@ namespace GtaTrainingHelper
                     var json = File.ReadAllText(statsPath);
                     stats = JsonConvert.DeserializeObject<Stats>(json);
                 }
+            }
+        }
+        
+        private static Socket CreateSocket()
+        {
+            IPHostEntry ipHostInfo = Dns.GetHostEntry("localhost");
+            IPAddress ipAddress = ipHostInfo.AddressList[1];
+            ipEndPoint = new IPEndPoint(ipAddress, 5000);
+            Socket client = new Socket(
+                    ipEndPoint.AddressFamily,
+                    SocketType.Stream,
+                    ProtocolType.Tcp);
+            client.Connect(ipEndPoint);
+            return client;
+        }
+        
+        private static void SendData(Socket client, PythonData pythonData)
+        {
+            string json = JsonConvert.SerializeObject(pythonData);
+            byte[] messageBytes = System.Text.Encoding.UTF8.GetBytes(json);
+            _ = client.Send(messageBytes);
+        }
+
+        private static void SocketLoop()
+        {
+            Socket client = CreateSocket();
+            while (true)
+            {
+                var buffer = new List<byte>();
+                while (client.Available > 0)
+                {
+                    var currByte = new Byte[1];
+                    var byteCounter = client.Receive(currByte, currByte.Length, SocketFlags.None);
+
+                    if (byteCounter.Equals(1))
+                    {
+                        buffer.Add(currByte[0]);
+                    }
+                }
+                if (buffer.Count > 0)
+                {
+                    string data = System.Text.Encoding.UTF8.GetString(buffer.ToArray());
+                    if (data == "true")
+                    {
+                        SendData(client, pythonData);
+                        pythonData.Success = false;
+                        pythonData.Distance = 0;
+                        pythonData.Damage = 0;
+                        pythonData.HardReset = false;
+                    }
+                }
+                GameFiber.Yield();
             }
         }
     }

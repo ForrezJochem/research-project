@@ -26,7 +26,7 @@ def create_q_model():
     return keras.Model(inputs=input, outputs=action)
 
 model = create_q_model()
-model.load_weights("Python\model.h5")
+model.load_weights("model.h5")
 
 print("attempting to connect to python client")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

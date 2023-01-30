@@ -1,29 +1,21 @@
 import json
-import time
-import dxcam
 import pickle
 import socket
-import datetime
-import win32gui
 import numpy as np
 import tkinter as tk
-from PIL import Image
 import tensorflow as tf
 from tensorflow import keras
-from skimage import data, io
-import skimage.transform as st
 from tensorflow.keras import layers
-from matplotlib import pyplot as plt
-from pynput.keyboard import Key, Controller
 
 
-gamma = 0.99  # Discount factor for past rewards
-epsilon = 0.28  # Epsilon greedy parameter
-epsilon_min = 0.01  # Minimum epsilon greedy parameter
-epsilon_max = 1.0  # Maximum epsilon greedy parameter
-epsilon_interval = (
-    epsilon_max - epsilon_min
-)  # Rate at which to reduce chance of random action being taken
+port_python_client = 5001
+port_gta_client = 5000
+
+gamma = 0.99 
+epsilon = 0.99
+epsilon_min = 0.01
+epsilon_max = 1.0  
+epsilon_interval = epsilon_max - epsilon_min 
 batch_size = 4
 max_steps_per_episode = 100000
 height, width = 128, 227
@@ -33,22 +25,20 @@ num_actions = 5
 def create_q_model():
     input = layers.Input(shape=(height, width, 3))
 
-    # Convolutions on the frames on the screen
-    layer1 = layers.Conv2D(64, 8, strides=4, activation="relu")(input)
-    layer2 = layers.Conv2D(128, 4, strides=2, activation="relu")(layer1)
-    layer3 = layers.Conv2D(256, 4, strides=2, activation="relu")(layer2)
-
+    # convolutions on the frames on the screen
+    layer1 = layers.Conv2D(64, 8, activation="relu")(input)
+    layer2 = layers.Conv2D(128, 4, activation="relu")(layer1)
+    layer3 = layers.Conv2D(256, 4, activation="relu")(layer2)
     layer4 = layers.Flatten()(layer3)
-
     layer5 = layers.Dense(128, activation="relu")(layer4)
     action = layers.Dense(num_actions, activation="linear")(layer5)
-
     return keras.Model(inputs=input, outputs=action)
+
 model = create_q_model()
 model_target = create_q_model()
 model.summary()
 
-
+# trys to load the model if it exists
 try:
     model.load_weights("model.h5")
     model_target.load_weights("model.h5")
@@ -58,16 +48,18 @@ except:
 
 print("attempting to connect to python client")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("0.0.0.0", 5001))
+s.bind(("0.0.0.0", port_python_client))
 s.listen()
 clientsocketpython, address = s.accept()
 print("connected to python client")
 print("attempting to connect to gta client")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("0.0.0.0", 5000))
+s.bind(("0.0.0.0", port_gta_client))
 s.listen()
 clientsocketgta, address = s.accept()
 print("connected to gta client")
+
+
 def get_gta_data():
     while True:
         try:
@@ -90,9 +82,7 @@ def send_python_data(data):
             return
     except:
         print("error in json dump")
-        print(data)
-    
-    
+
 
 def get_gta_image():
     while True:
@@ -121,6 +111,8 @@ window = tk.Tk()
 window.title("RL Agent Server")
 window.update()
 
+
+# optimizer adam with amsgrad and learning rate of 0.00025
 optimizer = keras.optimizers.Adam(learning_rate=0.00025, amsgrad=True)
 
 
@@ -134,7 +126,7 @@ running_reward = 0
 episode_count = 0
 frame_count = 0
 # Number of frames to take random action and observe output
-epsilon_random_frames = 0
+epsilon_random_frames = 50000
 # Number of frames for exploration
 epsilon_greedy_frames = 1000000.0
 max_memory_length = 2000
@@ -143,65 +135,41 @@ update_target_network = 1000
 # Using huber loss for stability
 loss_function = keras.losses.Huber()
 
-while True:  # Run until solved
-
-    state = np.array(get_gta_image())
+while True:
+    state = get_gta_image()
     episode_reward = 0
-
+    
     for timestep in range(1, max_steps_per_episode):
-        # env.render(); Adding this line would show the attempts
-        # of the agent in a pop up window.
         frame_count += 1
-        try:
-            actionTk.destroy()
-        except:
-            pass
-        # Use epsilon-greedy for exploration
+        # check if we should take a random action or the best action
         if frame_count < epsilon_random_frames or epsilon > np.random.rand(1)[0]:
-            # Take random action
+            # take a random action
             action = np.random.choice(num_actions)
-            actionTk = tk.Label(window, text="action: " + "random")
+            action_tk_label = "random"
         else:
-            # Predict action Q-values
-            # From environment state
+            # take the best action based on the model
             state_tensor = tf.convert_to_tensor(state)
             state_tensor = tf.expand_dims(state_tensor, 0)
             action_probs = model(state_tensor, training=False)
-            # Take best action
             action = tf.argmax(action_probs[0]).numpy()
-            actionTk = tk.Label(window, text="action: " + "best")
-        actionTk.pack()
-        # Decay probability of taking random action
+            action_tk_label = "best"
+
+        # reduce epsilon over time to encourage the agent to explore
         epsilon -= epsilon_interval / epsilon_greedy_frames
         epsilon = max(epsilon, epsilon_min)
-        try:
-            epsilonTk.destroy()
-        except:
-            pass
-        epsilonTk = tk.Label(window, text="epsilon: " + str(epsilon))
-        epsilonTk.pack()
-        # Apply the sampled action in our environment
+        
+        # get the next state
         state_next = get_gta_image()
+        # get the data from gta
         data = get_gta_data()
-        try:
-            gtaDataTk.destroy()
-        except:
-            pass
-        gtaDataTk = tk.Label(window, text="GTA Data: " + str(data))
-        gtaDataTk.pack()
         done = data["HardReset"]
+        # calculate the reward
         reward = calc_reward(data)
-        state_next = np.array(state_next)
+        # send the action to python client
         send_python_data(action)
+        state_next = np.array(state_next)
         episode_reward += reward
-        try:
-            rewardTk.destroy()
-        except:
-            pass
-        rewardTk = tk.Label(window, text="Episode reward: " + str(episode_reward))
-        rewardTk.pack()
-        window.update()
-        # Save actions and states in replay buffer
+        # save the data to the replay buffer
         action_history.append(action)
         state_history.append(state)
         state_next_history.append(state_next)
@@ -209,30 +177,24 @@ while True:  # Run until solved
         rewards_history.append(reward)
         state = state_next
 
-        # Update every fourth frame and once batch size is over 32
+        # update the model
         if frame_count % update_after_actions == 0 and len(done_history) > batch_size:
-
-            # Get indices of samples for replay buffers
+            # get indices of samples for replay buffers
             indices = np.random.choice(range(len(done_history)), size=batch_size)
 
-            # Using list comprehension to sample from replay buffer
+            # using list comprehension to sample from replay buffer
             state_sample = np.array([state_history[i] for i in indices])
             state_next_sample = np.array([state_next_history[i] for i in indices])
             rewards_sample = [rewards_history[i] for i in indices]
             action_sample = [action_history[i] for i in indices]
-            done_sample = tf.convert_to_tensor(
-                [float(done_history[i]) for i in indices]
-            )
+            done_sample = tf.convert_to_tensor([float(done_history[i]) for i in indices])
 
-            # Build the updated Q-values for the sampled future states
-            # Use the target model for stability
+
             future_rewards = model_target.predict(state_next_sample)
             # Q value = reward + discount factor * expected future reward
             updated_q_values = rewards_sample + gamma * tf.reduce_max(
-                future_rewards, axis=1
-            )
+                future_rewards, axis=1)
 
-            # If final frame set the last value to -1
             updated_q_values = updated_q_values * (1 - done_sample) - done_sample
 
             # Create a mask so we only calculate loss on the updated Q-values
@@ -255,10 +217,8 @@ while True:  # Run until solved
             # update the the target network with new weights
             model_target.set_weights(model.get_weights())
             model_target.save_weights('model.h5')
-            # Log details
             clientsocketgta.send(bytes("reset", "utf-8"))
-            template = "running reward: {:.2f} at episode {}, frame count {}"
-            print(template.format(running_reward, episode_count, frame_count))
+            print ("running reward: " + str(running_reward) + " at episode " + str(episode_count) + ", frame count " + str(frame_count) + " epsilon: " + str(epsilon))
             done = True
 
         # Limit the state and reward history
@@ -269,10 +229,35 @@ while True:  # Run until solved
             del action_history[:1]
             del done_history[:1]
 
+        if epsilonTk.winfo_exists():
+            epsilonTk.destroy()
+        if rewardTk.winfo_exists():
+            rewardTk.destroy()
+        if actionTk.winfo_exists():
+            actionTk.destroy()
+        if gtaDataTk.winfo_exists():
+            gtaDataTk.destroy()
+        if lossTk.winfo_exists():
+            lossTk.destroy()
+
+
+        epsilonTk = tk.Label(window, text="epsilon: " + str(epsilon))
+        lossTk = tk.Label(window, text="loss: " + str(loss))
+        actionTk = tk.Label(window, text="action: " + str(action_tk_label))
+        gtaDataTk = tk.Label(window, text="GTA Data: " + str(data))
+        rewardTk = tk.Label(window, text="Episode reward: " + str(episode_reward))
+
+        lossTk.pack()
+        epsilonTk.pack()
+        actionTk.pack()
+        rewardTk.pack()
+        gtaDataTk.pack()
+
+        window.update()
+
         if done:
             break
 
-    # Update running reward to check condition for solving
     episode_reward_history.append(episode_reward)
     if len(episode_reward_history) > 100:
         del episode_reward_history[:1]

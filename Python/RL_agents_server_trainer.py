@@ -128,7 +128,7 @@ frame_count = 0
 # Number of frames to take random action and observe output
 epsilon_random_frames = 50000
 # Number of frames for exploration
-epsilon_greedy_frames = 1000000.0
+epsilon_greedy_frames = 1000000
 max_memory_length = 2000
 update_after_actions = 10
 update_target_network = 1000
@@ -217,7 +217,7 @@ while True:
         if frame_count % update_target_network == 0:
             # update the the target network with new weights
             model_target.set_weights(model.get_weights())
-            model_target.save_weights('model.h5')
+            model_target.save_weights(model.h5)
             clientsocketgta.send(bytes("reset", "utf-8"))
             print ("running reward: " + str(running_reward) + " at episode " + str(episode_count) + ", frame count " + str(frame_count) + " epsilon: " + str(epsilon))
             done = True

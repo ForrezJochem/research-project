@@ -1,0 +1,416 @@
+[
+  {
+    "LocationName": "MichealHouse",
+    "Position": {
+      "X": -868.29895,
+      "Y": 125.019089,
+      "Z": 57.3375549
+    },
+    "Heading": 183.580475
+  },
+  {
+    "LocationName": "blvDelPerroChurch",
+    "Position": {
+      "X": -757.840454,
+      "Y": -35.98403,
+      "Z": 37.3266754
+    },
+    "Heading": 116.134644
+  },
+  {
+    "LocationName": "LifeInvador",
+    "Position": {
+      "X": -1070.09363,
+      "Y": -225.751938,
+      "Z": 37.3930054
+    },
+    "Heading": 302.212952
+  },
+  {
+    "LocationName": "RichmanSmall",
+    "Position": {
+      "X": -1193.74329,
+      "Y": -133.218857,
+      "Z": 39.9945946
+    },
+    "Heading": 273.59024
+  },
+  {
+    "LocationName": "GolfCourse",
+    "Position": {
+      "X": -1334.68591,
+      "Y": -31.1914387,
+      "Z": 49.84677
+    },
+    "Heading": 177.6782
+  },
+  {
+    "LocationName": "croqahoop",
+    "Position": {
+      "X": -735.806763,
+      "Y": -136.755157,
+      "Z": 36.83665
+    },
+    "Heading": 47.07794
+  },
+  {
+    "LocationName": "backofcityhall",
+    "Position": {
+      "X": -552.352,
+      "Y": -158.7313,
+      "Z": 37.8544
+    },
+    "Heading": 305.5754
+  },
+  {
+    "LocationName": "frontofcityhall",
+    "Position": {
+      "X": -506.555878,
+      "Y": -259.856781,
+      "Z": 35.12579
+    },
+    "Heading": 126.587662
+  },
+  {
+    "LocationName": "dorsetdrivemovie",
+    "Position": {
+      "X": -481.516327,
+      "Y": -388.100067,
+      "Z": 33.65758
+    },
+    "Heading": 273.420959
+  },
+  {
+    "LocationName": "rockfordplaza",
+    "Position": {
+      "X": -201.14682,
+      "Y": -174.616821,
+      "Z": 43.24521
+    },
+    "Heading": 160.2851
+  },
+  {
+    "LocationName": "drivingschool",
+    "Position": {
+      "X": -74.36168,
+      "Y": -225.529648,
+      "Z": 44.50202
+    },
+    "Heading": 133.695557
+  },
+  {
+    "LocationName": "arcadiusbuilding",
+    "Position": {
+      "X": -109.60379,
+      "Y": -633.297852,
+      "Z": 35.71824
+    },
+    "Heading": 183.0137
+  },
+  {
+    "LocationName": "altastreet",
+    "Position": {
+      "X": -246.768066,
+      "Y": -1000.20856,
+      "Z": 28.76472
+    },
+    "Heading": 247.631165
+  },
+  {
+    "LocationName": "towing",
+    "Position": {
+      "X": -158.51297,
+      "Y": -1150.74609,
+      "Z": 23.2920856
+    },
+    "Heading": 289.977722
+  },
+  {
+    "LocationName": "forum",
+    "Position": {
+      "X": -49.5561562,
+      "Y": -1471.80359,
+      "Z": 31.5507278
+    },
+    "Heading": 306.811218
+  },
+  {
+    "LocationName": "grovestreet",
+    "Position": {
+      "X": 109.601379,
+      "Y": -1944.97046,
+      "Z": 20.40663
+    },
+    "Heading": 40.3205757
+  },
+  {
+    "LocationName": "vagos",
+    "Position": {
+      "X": 302.140961,
+      "Y": -2011.15369,
+      "Z": 19.74203
+    },
+    "Heading": 38.0532341
+  },
+  {
+    "LocationName": "throns",
+    "Position": {
+      "X": 907.0956,
+      "Y": -2090.538,
+      "Z": 30.0654373
+    },
+    "Heading": 267.424835
+  },
+  {
+    "LocationName": "officefurniture",
+    "Position": {
+      "X": 1061.5553,
+      "Y": -2175.78687,
+      "Z": 31.275835
+    },
+    "Heading": 0.8178689
+  },
+  {
+    "LocationName": "mbg",
+    "Position": {
+      "X": 1316.34778,
+      "Y": -1568.3573,
+      "Z": 50.84351
+    },
+    "Heading": 35.3375778
+  },
+  {
+    "LocationName": "mrpd",
+    "Position": {
+      "X": 402.4695,
+      "Y": -1021.16467,
+      "Z": 28.9593372
+    },
+    "Heading": 3.30651546
+  },
+  {
+    "LocationName": "acehole",
+    "Position": {
+      "X": 342.095337,
+      "Y": -738.9965,
+      "Z": 28.77789
+    },
+    "Heading": 349.547974
+  },
+  {
+    "LocationName": "coolbeans",
+    "Position": {
+      "X": 1193.77307,
+      "Y": -403.3675,
+      "Z": 67.51921
+    },
+    "Heading": 187.558075
+  },
+  {
+    "LocationName": "casino",
+    "Position": {
+      "X": 934.8495,
+      "Y": 86.2899,
+      "Z": 78.51995
+    },
+    "Heading": 51.0379944
+  },
+  {
+    "LocationName": "vault",
+    "Position": {
+      "X": 221.134308,
+      "Y": 218.738373,
+      "Z": 105.046921
+    },
+    "Heading": 337.3358
+  },
+  {
+    "LocationName": "roosters",
+    "Position": {
+      "X": -187.892441,
+      "Y": 269.138855,
+      "Z": 91.99311
+    },
+    "Heading": 115.904449
+  },
+  {
+    "LocationName": "hill1",
+    "Position": {
+      "X": -560.4658,
+      "Y": 848.1683,
+      "Z": 200.138657
+    },
+    "Heading": 78.0865555
+  },
+  {
+    "LocationName": "hillpark",
+    "Position": {
+      "X": -800.470642,
+      "Y": 827.016052,
+      "Z": 203.709808
+    },
+    "Heading": 100.588821
+  },
+  {
+    "LocationName": "hill2",
+    "Position": {
+      "X": -1017.27173,
+      "Y": 702.480652,
+      "Z": 161.6354
+    },
+    "Heading": 262.071838
+  },
+  {
+    "LocationName": "vinewoodbowl",
+    "Position": {
+      "X": 896.168762,
+      "Y": 526.901855,
+      "Z": 122.700912
+    },
+    "Heading": 258.785217
+  },
+  {
+    "LocationName": "sdso",
+    "Position": {
+      "X": 1858.31628,
+      "Y": 3658.0498,
+      "Z": 33.62242
+    },
+    "Heading": 305.968567
+  },
+  {
+    "LocationName": "boathouse",
+    "Position": {
+      "X": 1555.8988,
+      "Y": 3768.3667,
+      "Z": 34.1076965
+    },
+    "Heading": 127.081123
+  },
+  {
+    "LocationName": "motel",
+    "Position": {
+      "X": 1652.91638,
+      "Y": 3569.685,
+      "Z": 35.03082
+    },
+    "Heading": 255.768433
+  },
+  {
+    "LocationName": "harmonybank",
+    "Position": {
+      "X": 1171.52185,
+      "Y": 2692.23535,
+      "Z": 37.48043
+    },
+    "Heading": 175.044891
+  },
+  {
+    "LocationName": "harmonydollarpills",
+    "Position": {
+      "X": 591.898132,
+      "Y": 2707.103,
+      "Z": 41.3495
+    },
+    "Heading": 179.4114
+  },
+  {
+    "LocationName": "harmonymotel",
+    "Position": {
+      "X": 271.698517,
+      "Y": 2623.179,
+      "Z": 44.1978455
+    },
+    "Heading": 307.919464
+  },
+  {
+    "LocationName": "chickenfactory",
+    "Position": {
+      "X": -41.863163,
+      "Y": 6309.64941,
+      "Z": 30.9375725
+    },
+    "Heading": 32.1830254
+  },
+  {
+    "LocationName": "paletopd",
+    "Position": {
+      "X": -432.857544,
+      "Y": 6040.67969,
+      "Z": 30.93411
+    },
+    "Heading": 291.389221
+  },
+  {
+    "LocationName": "paletobank",
+    "Position": {
+      "X": -99.9129257,
+      "Y": 6425.09668,
+      "Z": 30.9832764
+    },
+    "Heading": 318.289
+  },
+  {
+    "LocationName": "paletogasstation",
+    "Position": {
+      "X": 184.997009,
+      "Y": 6564.90967,
+      "Z": 31.553751
+    },
+    "Heading": 127.348488
+  },
+  {
+    "LocationName": "hookies",
+    "Position": {
+      "X": -2211.84546,
+      "Y": 4277.24365,
+      "Z": 47.4613953
+    },
+    "Heading": 44.2941742
+  },
+  {
+    "LocationName": "uwu",
+    "Position": {
+      "X": -550.36084,
+      "Y": -1121.6543,
+      "Z": 20.8308964
+    },
+    "Heading": 248.664215
+  },
+  {
+    "LocationName": "civboatdock",
+    "Position": {
+      "X": -705.172058,
+      "Y": -1246.34546,
+      "Z": 9.863867
+    },
+    "Heading": 304.04776
+  },
+  {
+    "LocationName": "viceroy",
+    "Position": {
+      "X": -850.4431,
+      "Y": -1183.46472,
+      "Z": 5.361959
+    },
+    "Heading": 12.8498535
+  },
+  {
+    "LocationName": "burgershot",
+    "Position": {
+      "X": -1182.10461,
+      "Y": -871.5264,
+      "Z": 13.58249
+    },
+    "Heading": 35.8208466
+  },
+  {
+    "LocationName": "pier",
+    "Position": {
+      "X": -1577.83325,
+      "Y": -926.3233,
+      "Z": 15.616128
+    },
+    "Heading": 316.6479
+  }
+]

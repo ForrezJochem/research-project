@@ -26,9 +26,9 @@ def create_q_model():
     input = layers.Input(shape=(height, width, 3))
 
     # convolutions on the frames on the screen
-    layer1 = layers.Conv2D(64, 8, activation="relu")(input)
-    layer2 = layers.Conv2D(128, 4, activation="relu")(layer1)
-    layer3 = layers.Conv2D(256, 4, activation="relu")(layer2)
+    layer1 = layers.Conv2D(64, 8, strides=4, activation="relu")(input)
+    layer2 = layers.Conv2D(128, 4, strides=2, activation="relu")(layer1)
+    layer3 = layers.Conv2D(256, 4, strides=1, activation="relu")(layer2)
     layer4 = layers.Flatten()(layer3)
     layer5 = layers.Dense(128, activation="relu")(layer4)
     action = layers.Dense(num_actions, activation="linear")(layer5)
@@ -134,6 +134,7 @@ update_after_actions = 10
 update_target_network = 1000
 # Using huber loss for stability
 loss_function = keras.losses.Huber()
+loss = None
 
 while True:
     state = get_gta_image()
@@ -229,16 +230,14 @@ while True:
             del action_history[:1]
             del done_history[:1]
 
-        if epsilonTk.winfo_exists():
+        try:
             epsilonTk.destroy()
-        if rewardTk.winfo_exists():
             rewardTk.destroy()
-        if actionTk.winfo_exists():
             actionTk.destroy()
-        if gtaDataTk.winfo_exists():
             gtaDataTk.destroy()
-        if lossTk.winfo_exists():
             lossTk.destroy()
+        except:
+            pass
 
 
         epsilonTk = tk.Label(window, text="epsilon: " + str(epsilon))
@@ -247,12 +246,13 @@ while True:
         gtaDataTk = tk.Label(window, text="GTA Data: " + str(data))
         rewardTk = tk.Label(window, text="Episode reward: " + str(episode_reward))
 
-        lossTk.pack()
+        
         epsilonTk.pack()
         actionTk.pack()
         rewardTk.pack()
         gtaDataTk.pack()
-
+        lossTk.pack()
+        
         window.update()
 
         if done:

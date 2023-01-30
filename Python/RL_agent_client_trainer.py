@@ -7,7 +7,7 @@ import skimage.transform as st
 from pynput.keyboard import Key, Controller
 
 # ip off the server (the machine that runs the RL_agents_server.py file)
-ip = "192.168.0.136"
+ip = "127.0.0.1"
 # port off the server (the machine that runs the RL_agents_server.py file)
 port = 5001
 # the size of the image that will be sent to the server

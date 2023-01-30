@@ -12,5 +12,6 @@ namespace GtaTrainingHelper
         public bool Success { get; set; }
         public int Damage { get; set; }
         public int Distance { get; set; }
+        public int Speed { get; set; }
     }
 }

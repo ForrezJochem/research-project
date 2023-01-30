@@ -24,6 +24,7 @@ namespace GtaTrainingHelper
         static PythonData pythonData = new PythonData();
         static int vehicleHealth;
         static int distance;
+        static int speed;
         static IPEndPoint ipEndPoint;
         static DateTime startTime;
         static Stats stats;
@@ -46,6 +47,7 @@ namespace GtaTrainingHelper
                         int healthDifference = vehicleHealth - Game.LocalPlayer.Character.CurrentVehicle.Health;
                         pythonData.Distance += distance - (int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position);
                         distance = (int)blip.TravelDistanceTo(Game.LocalPlayer.Character.CurrentVehicle.Position);
+                        speed += Math.Abs((int)Game.LocalPlayer.Character.CurrentVehicle.Speed);
                         if (healthDifference > 0)
                         {
                             stats.TotalDamage += healthDifference;
@@ -153,6 +155,15 @@ namespace GtaTrainingHelper
                     Game.LocalPlayer.Character.Position = loc.Position;
                     Game.LocalPlayer.Character.Heading = loc.Heading;
                 }
+            }
+        }
+
+        [Rage.Attributes.ConsoleCommand]
+        public static void GTHSetupIp(string ip)
+        {
+            {
+                Game.Console.Print("Setting up ip: " + ip);
+                ipEndPoint = new IPEndPoint(IPAddress.Parse(ip), 5000);
             }
         }
 
@@ -297,7 +308,6 @@ namespace GtaTrainingHelper
         {
             IPHostEntry ipHostInfo = Dns.GetHostEntry("localhost");
             IPAddress ipAddress = ipHostInfo.AddressList[1];
-            ipEndPoint = new IPEndPoint(ipAddress, 5000);
             Socket client = new Socket(
                     ipEndPoint.AddressFamily,
                     SocketType.Stream,
@@ -339,6 +349,10 @@ namespace GtaTrainingHelper
                         pythonData.Distance = 0;
                         pythonData.Damage = 0;
                         pythonData.HardReset = false;
+                    }
+                    else if (data == "reset")
+                    {
+                        GTHSetup();
                     }
                 }
                 GameFiber.Yield();

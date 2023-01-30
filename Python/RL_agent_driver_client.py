@@ -1,16 +1,18 @@
 import time
 import dxcam
+import pickle
+import socket
 import skimage.transform as st
-import tensorflow as tf
 import win32gui
 from pynput.keyboard import Controller, Key
-from tensorflow.keras import layers
-from pynput import keyboard
-from tensorflow import keras
 
+
+# ip off the server (the machine that runs the RL_agents_server.py file)
+ip = "192.168.0.136"
+# port off the server (the machine that runs the RL_agents_server.py file)
+port = 5001
+# the size of the image that will be sent to the server
 height, width = 128, 227
-num_actions = 5
-running = False
 
 # the code below is used to get the window of the game
 hwnd = win32gui.FindWindow(None, "Grand Theft Auto V")
@@ -20,6 +22,12 @@ camera = dxcam.create(output_color="RGB")
 
 # the code below is used to mimic the keyboard
 controller = Controller()
+
+# the code below is used to connect to the server
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((ip, port ))
+
+
 
 def get_screenshot():
     frame = camera.grab(region=(window))
@@ -56,25 +64,15 @@ def do_action(action):
     except:
         pass
 
-def create_q_model():
-    input = layers.Input(shape=(height, width, 3))
-
-    # convolutions on the frames on the screen
-    layer1 = layers.Conv2D(64, 8, activation="relu")(input)
-    layer2 = layers.Conv2D(128, 4, activation="relu")(layer1)
-    layer3 = layers.Conv2D(256, 4, activation="relu")(layer2)
-    layer4 = layers.Flatten()(layer3)
-    layer5 = layers.Dense(128, activation="relu")(layer4)
-    action = layers.Dense(num_actions, activation="linear")(layer5)
-    return keras.Model(inputs=input, outputs=action)
-
-model = create_q_model()
-model.load_weights("model.h5")
-
 
 
 while True:
+    data = s.recv(1024)
+    data = data.decode("utf-8")
+    if data == "true":
+        frame = get_screenshot()
+        frame = pickle.dumps(frame)
+        s.send(frame)
+    else:
+        do_action(data)
     
-    action_probs = model.predict(get_screenshot())
-    action = tf.argmax(action_probs[0]).numpy()
-    print(action)
